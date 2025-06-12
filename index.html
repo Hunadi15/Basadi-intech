@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Disaster Resource Coordination</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Define purple shades for consistency */
+      --purple-dark: #6A0DAD; /* A deep, rich purple */
+      --purple-medium: #8A2BE2; /* BlueViolet, a vibrant purple */
+      --purple-light: #E0BBE4; /* A soft, light purple */
+      /* Changed green accents to grey shades */
+      --grey-accent: #6c757d; /* A medium grey */
+      --grey-accent-dark: #495057; /* A darker grey */
+      --blue-primary: #3498db;
+      --blue-dark: #2980b9;
+      --gray-light: #f4f7f8;
+      --gray-medium: #ccc;
+      --gray-dark: #333;
+      --text-color: #333;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif; /* Using Inter font */
+      margin: 0; /* Remove default body margin */
+      padding: 20px;
+      background: linear-gradient(135deg, var(--gray-light) 0%, var(--purple-light) 100%); /* Subtle purple gradient background */
+      color: var(--text-color);
+      min-height: 100vh; /* Ensure full viewport height */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      text-align: center;
+      color: var(--purple-dark); /* Deep purple for the main heading */
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: var(--purple-medium); /* Vibrant purple for section headings */
+      text-align: center;
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      background: var(--white);
+      border-radius: 8px;
+      overflow: hidden; /* Ensures rounded corners apply to content */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    th, td {
+      padding: 15px;
+      border: 1px solid #eee; /* Lighter border for a cleaner look */
+      text-align: left;
+    }
+    th {
+      background-color: var(--purple-medium); /* Vibrant purple for table headers */
+      color: var(--white);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.9em;
+    }
+    form {
+      background: var(--white);
+      padding: 25px;
+      border-radius: 8px;
+      max-width: 500px;
+      margin: 0 auto 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease-in-out; /* Smooth transition on hover */
+    }
+    form:hover {
+        transform: translateY(-5px); /* Lift effect on hover */
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--gray-dark);
+    }
+    input, select {
+      width: calc(100% - 20px); /* Adjust width for padding */
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid var(--gray-medium);
+      border-radius: 5px;
+      font-size: 1em;
+      transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    input:focus, select:focus {
+      border-color: var(--purple-medium);
+      box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2); /* Purple glow on focus */
+      outline: none;
+    }
+    button {
+      background-color: var(--purple-medium); /* Vibrant purple for buttons */
+      color: var(--white);
+      border: none;
+      padding: 12px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 1em;
+      font-weight: 600;
+      transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    button:hover {
+      background-color: var(--purple-dark); /* Darker purple on hover */
+      transform: translateY(-2px); /* Slight lift on hover */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    #requests {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .status-pending {
+      color: orange;
+      font-weight: bold;
+    }
+    .status-approved, .status-complete { /* Combined styles for approved and complete */
+      color: var(--grey-accent); /* Changed to grey */
+      font-weight: bold;
+    }
+    .province-selector {
+      text-align: center;
+      margin: 20px 0;
+      background: var(--white);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 900px;
+    }
+    .province-btn {
+      margin: 8px; /* Increased margin for better spacing */
+      padding: 10px 18px; /* Increased padding for better touch targets */
+      background: var(--blue-primary);
+      color: var(--white);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+      font-weight: 600;
+    }
+    .province-btn:hover {
+        background: var(--blue-dark);
+        transform: translateY(-2px);
+    }
+    .province-btn.active {
+      background: var(--purple-dark); /* Dark purple for active province button */
+      font-weight: bold;
+      transform: translateY(-2px);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+    .resource-summary {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px; /* Increased gap between cards */
+      margin: 20px 0;
+      width: 100%;
+      max-width: 900px;
+    }
+    .resource-card {
+      background: var(--white);
+      padding: 20px; /* Increased padding */
+      border-radius: 8px; /* More rounded corners */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08); /* Enhanced shadow */
+      min-width: 220px; /* Slightly wider cards */
+      text-align: center;
+      flex: 1; /* Allow cards to grow */
+      max-width: 280px; /* Max width for cards */
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    .resource-card:hover {
+        transform: translateY(-5px); /* Lift effect on hover */
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+    .resource-card h3 {
+      margin-top: 0;
+      color: var(--purple-dark); /* Purple for resource card titles */
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    .resource-value {
+      font-size: 2.2em; /* Larger font for values */
+      font-weight: 700; /* Bolder font */
+      color: var(--grey-accent); /* Changed to grey */
+      margin-bottom: 5px;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .province-selector, .resource-summary, form, table, #requests {
+            width: 95%; /* Adjust width for smaller screens */
+            padding: 15px;
+        }
+        .province-btn {
+            padding: 8px 12px;
+            margin: 5px;
+        }
+        .resource-card {
+            min-width: 150px;
+            padding: 15px;
+        }
+        h1 {
+            font-size: 2em;
+        }
+    }
+    @media (max-width: 480px) {
+        body {
+            padding: 10px;
+        }
+        h1 {
+            font-size: 1.8em;
+        }
+        .province-btn {
+            font-size: 0.9em;
+        }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Disaster Resource Coordination Portal</h1>
+
+  <div class="province-selector">
+    <h2>Select Province</h2>
+    <div id="provinceButtons">
+      <button class="province-btn active" data-province="national">National Overview</button>
+      <button class="province-btn" data-province="gauteng">Gauteng</button>
+      <button class="province-btn" data-province="western-cape">Western Cape</button>
+      <button class="province-btn" data-province="kzn">KwaZulu-Natal</button>
+      <button class="province-btn" data-province="eastern-cape">Eastern Cape</button>
+      <button class="province-btn" data-province="limpopo">Limpopo</button>
+      <button class="province-btn" data-province="mpumalanga">Mpumalanga</button>
+      <button class="province-btn" data-province="north-west">North West</button>
+      <button class="province-btn" data-province="free-state">Free State</button>
+      <button class="province-btn" data-province="northern-cape">Northern Cape</button>
+    </div>
+  </div>
+
+  <h2 id="provinceHeader">National Resource Summary</h2>
+  
+  <div class="resource-summary" id="resourceSummary">
+    </div>
+
+  <h2>Detailed Resource Availability</h2>
+  <table id="resourceTable">
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Quantity Available</th>
+        <th>Allocated</th>
+        <th>Remaining</th>
+      </tr>
+    </thead>
+    <tbody id="resourceTableBody">
+      </tbody>
+  </table>
+
+  <h2>Submit a Resource Request</h2>
+  <form id="requestForm">
+    <label for="agency">Name and Contact</label>
+    <input type="text" id="agency" name="agency" required />
+
+    <label for="province">Province</label>
+    <select id="province" name="province" required>
+      <option value="">--Select Province--</option>
+      <option value="gauteng">Gauteng</option>
+      <option value="western-cape">Western Cape</option>
+      <option value="kzn">KwaZulu-Natal</option>
+      <option value="eastern-cape">Eastern Cape</option>
+      <option value="limpopo">Limpopo</option>
+      <option value="mpumalanga">Mpumalanga</option>
+      <option value="north-west">North West</option>
+      <option value="free-state">Free State</option>
+      <option value="northern-cape">Northern Cape</option>
+    </select>
+
+    <label for="location">Exact Location (e.g., Street Address, Landmark)</label>
+    <input type="text" id="location" name="location" placeholder="e.g., 123 Main St, City Hall" required />
+
+    <label for="resource">Resource Needed</label>
+    <select id="resource" name="resource" required>
+      <option value="">--Select--</option>
+      <option value="Power and Communication">Power and Communication</option>
+      <option value="Medical Team">Medical Team</option>
+      <option value="Rescue Team">Rescue </option>
+      <option value="Tents">Tents</option>
+      <option value="Survival Essentials">Survival Essentials</option>
+    </select>
+
+    <label for="quantity">Quantity</label>
+    <input type="number" id="quantity" name="quantity" min="1" required />
+
+    <button type="submit">Submit Request</button>
+  </form>
+
+  <h2>Submitted Requests</h2>
+  <div id="requests">
+    <table>
+      <thead>
+        <tr>
+          <th>Name and Contact</th>
+          <th>Province</th>
+          <th>Requested Location</th>
+          <th>Nearest Resource Location</th>
+          <th>Resource</th>
+          <th>Quantity</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="requestList">
+        </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Database of resources by province
+    const resources = {
+      national: {
+        "Power and Communication": { available: 31500, allocated: 0 },
+        "Medical Team": { available: 9000, allocated: 0 },
+        "Rescue Team": { available: 19900, allocated: 0 },         
+        "Tents": { available: 1250, allocated: 0 },
+        "Survival Essentials": { available: 17100, allocated: 0 },
+        resourceLocations: ["National Logistics Hub, Pretoria", "Central Aid Depot, Bloemfontein"]
+      },
+      "gauteng": {
+        "Power and Communication": { available: 4000, allocated: 0 },
+        "Medical Team": { available: 1000, allocated: 0 },
+        "Rescue Team": { available: 2500, allocated: 0 },         
+        "Tents": { available: 150, allocated: 0 },
+        "Survival Essentials": { available: 2000, allocated: 0 },
+        resourceLocations: ["Johannesburg Central Depot", "Pretoria North Warehouse", "Soweto Distribution Point"]
+      },
+      "western-cape": {
+        "Power and Communication": { available: 3000, allocated: 0 },
+        "Medical Team": { available: 800, allocated: 0 },
+        "Rescue Team": { available: 2000, allocated: 0 },       
+        "Tents": { available: 120, allocated: 0 },
+        "Survival Essentials": { available: 1800, allocated: 0 },
+        resourceLocations: ["Cape Town Main Depot", "George Regional Hub", "Stellenbosch Aid Centre"]
+      },
+      "kzn": {
+        "Power and Communication": { available: 3500, allocated: 0 },
+        "Medical Team": { available: 900, allocated: 0 },
+        "Rescue Team": { available: 2200, allocated: 0 },         
+        "Tents": { available: 140, allocated: 0 },
+        "Survival Essentials": { available: 1900, allocated: 0 },
+        resourceLocations: ["Durban Port Warehouse", "Pietermaritzburg Logistics", "Richards Bay Supply Point"]
+      },
+      "eastern-cape": {
+        "Power and Communication": { available: 3500, allocated: 0 },
+        "Medical Team": { available: 900, allocated: 0 },
+        "Rescue Team": { available: 2200, allocated: 0 },     
+        "Tents": { available: 140, allocated: 0 },
+        "Survival Essentials": { available: 1900, allocated: 0 },
+        resourceLocations: ["Gqeberha Distribution", "East London Depot", "Mthatha Storage"]
+      },
+      "limpopo": {
+        "Power and Communication": { available: 3500, allocated: 0 },
+        "Medical Team": { available: 900, allocated: 0 },
+        "Rescue Team": { available: 2200, allocated: 0 },         
+        "Tents": { available: 140, allocated: 0 },
+        "Survival Essentials": { available: 1900, allocated: 0 },
+        resourceLocations: ["Polokwane Central", "Thohoyandou Hub", "Lephalale Logistics"]
+      },
+      "mpumalanga": {
+        "Power and Communication": { available: 3500, allocated: 0 },
+        "Medical Team": { available: 900, allocated: 0 },
+        "Rescue Team": { available: 2200, allocated: 0 },         
+        "Tents": { available: 140, allocated: 0 },
+        "Survival Essentials": { available: 1900, allocated: 0 },
+        resourceLocations: ["Mbombela Depot", "Emalahleni Warehouse", "Secunda Supply"]
+      },
+      "north-west": {
+        "Power and Communication": { available: 3500, allocated: 0 },
+        "Medical Team": { available: 900, allocated: 0 },
+        "Rescue Team": { available: 2200, allocated: 0 },         
+        "Tents": { available: 140, allocated: 0 },
+        "Survival Essentials": { available: 1900, allocated: 0 },
+        resourceLocations: ["Mahikeng Distribution", "Rustenburg Aid Centre", "Klerksdorp Logistics"]
+      },
+        "free-state": {
+        "Power and Communication": { available: 3500, allocated: 0 },
+        "Medical Team": { available: 900, allocated: 0 },
+        "Rescue Team": { available: 2200, allocated: 0 },         
+        "Tents": { available: 140, allocated: 0 },
+        "Survival Essentials": { available: 1900, allocated: 0 },
+        resourceLocations: ["Bloemfontein Main Depot", "Welkom Supply Point", "Bethlehem Aid"]
+        },
+        "northern-cape": {
+        "Power and Communication": { available: 3500, allocated: 0 },
+        "Medical Team": { available: 900, allocated: 0 },
+        "Rescue Team": { available: 2200, allocated: 0 },         
+        "Tents": { available: 140, allocated: 0 },
+        "Survival Essentials": { available: 1900, allocated: 0 },
+        resourceLocations: ["Kimberley Central", "Upington Logistics", "Springbok Distribution"]
+        } 
+    };
+
+    // Initialize with national data
+    let currentProvince = "national";
+    const requestForm = document.getElementById('requestForm');
+    const requestList = document.getElementById('requestList');
+    const resourceTableBody = document.getElementById('resourceTableBody');
+    const resourceSummary = document.getElementById('resourceSummary');
+    const provinceHeader = document.getElementById('provinceHeader');
+
+    // In-memory requests array (replace with backend API in production)
+    const requests = [];
+
+    // Set up province selection buttons
+    document.querySelectorAll('.province-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Update active button
+        document.querySelectorAll('.province-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update current province
+        currentProvince = this.dataset.province;
+        updateResourceDisplay();
+      });
+    });
+
+    // Update resource tables based on selected province
+    function updateResourceDisplay() {
+      // Update header
+      if (currentProvince === "national") {
+        provinceHeader.textContent = "National Resource Summary";
+      } else {
+        provinceHeader.textContent = `${formatProvinceName(currentProvince)} Resource Summary`;
+      }
+
+      // Clear tables
+      resourceTableBody.innerHTML = "";
+      resourceSummary.innerHTML = "";
+
+      // Get current resources
+      const currentResources = resources[currentProvince];
+
+      // Create summary cards
+      for (const [resource, data] of Object.entries(currentResources)) {
+        // Only process if it's a resource, not resourceLocations
+        if (typeof data === 'object' && data !== null && 'available' in data) {
+          // Summary card
+          const card = document.createElement('div');
+          card.className = 'resource-card';
+          card.innerHTML = `
+            <h3>${resource}</h3>
+            <div class="resource-value">${data.available - data.allocated}</div>
+            <div>Available</div>
+          `;
+          resourceSummary.appendChild(card);
+
+          // Detailed table row
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${resource}</td>
+            <td>${data.available}</td>
+            <td>${data.allocated}</td>
+            <td>${data.available - data.allocated}</td>
+          `;
+          resourceTableBody.appendChild(row);
+        }
+      }
+    }
+
+    // Format province name for display
+    function formatProvinceName(provinceId) {
+      return provinceId.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    }
+
+    // Handle form submission
+    requestForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const agency = e.target.agency.value.trim();
+      const province = e.target.province.value;
+      const location = e.target.location.value.trim(); 
+      const resource = e.target.resource.value;
+      const quantity = parseInt(e.target.quantity.value, 10);
+
+      if (!agency || !province || !location || !resource || !quantity || quantity <= 0) { 
+        console.error('Please fill in all fields correctly.');
+        return;
+      }
+
+      // Check if enough resources are available
+      const provinceResources = resources[province];
+      const nationalResources = resources.national;
+      
+      if (!provinceResources[resource] || provinceResources[resource].available - provinceResources[resource].allocated < quantity) {
+        console.error(`Not enough ${resource} available in ${formatProvinceName(province)}.`);
+        return;
+      }
+
+      // Determine nearest resource location based on selected province
+      let nearestLocation = "N/A"; // Default if no locations are defined
+      if (resources[province] && resources[province].resourceLocations && resources[province].resourceLocations.length > 0) {
+        // For simplicity, pick the first location. In a real app, this would be a calculated nearest point.
+        nearestLocation = resources[province].resourceLocations[0]; 
+      }
+
+    const newRequest = { 
+      agency, 
+      province: formatProvinceName(province),
+      location, 
+      nearestLocation: nearestLocation, // Use the determined nearest location
+      resource, 
+      quantity, 
+      status: 'Pending' 
+    };
+
+    requests.push(newRequest);
+    renderRequests();
+
+    // Simulate processing time: change status to "Complete" after 3 seconds (3000 ms)
+    setTimeout(() => {
+      newRequest.status = 'Complete';
+
+      // Update allocations only after request is marked as complete
+      provinceResources[resource].allocated += quantity;
+      nationalResources[resource].allocated += quantity;
+
+      updateResourceDisplay();
+      renderRequests(); // Re-render to show updated status
+    }, 3000);
+
+    requestForm.reset();
+
+
+    });
+
+    function renderRequests() {
+      requestList.innerHTML = '';
+      requests.forEach((req, index) => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+          <td>${req.agency}</td>
+          <td>${req.province}</td>
+          <td>${req.location}</td> 
+          <td>${req.nearestLocation}</td> 
+          <td>${req.resource}</td>
+          <td>${req.quantity}</td>
+          <td class="status-${req.status.toLowerCase()}">${req.status}</td>
+        `;
+
+        requestList.appendChild(tr);
+      });
+    }
+
+    
+    updateResourceDisplay();
+    renderRequests();
+
+
+     window.chtlConfig = { chatbotId: "7987349466" } </script>
+<script async data-id="7987349466" id="chtl-script" type="text/javascript" src="https://chatling.ai/js/embed.js">
+
+  </script>
+
+</body>
+</html>
